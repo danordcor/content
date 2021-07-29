@@ -1,0 +1,40 @@
+on:
+  push:
+    branches: [main]
+
+name: Deploy to Cloudfront distribution Develop
+
+jobs:
+  deploy:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: List dir
+        run: ls -la
+
+      - name: Copy new files to s3
+        run: aws s3 sync dev/ s3://bucket-dev --delete
+
+      - name: Invalidate Cloudfront cache
+        run: aws cloudfront create-invalidation --distribution-id E3NER8I9U4VF04 --paths "/*"
+
+      - name: Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          job_name: deploy
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
