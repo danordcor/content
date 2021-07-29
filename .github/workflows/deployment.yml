@@ -25,16 +25,3 @@ jobs:
 
       - name: Copy new files to s3
         run: aws s3 sync dev/ s3://bucket-dev --delete
-
-      - name: Invalidate Cloudfront cache
-        run: aws cloudfront create-invalidation --distribution-id E3NER8I9U4VF04 --paths "/*"
-
-      - name: Notification
-        uses: 8398a7/action-slack@v3
-        with:
-          job_name: deploy
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always()
