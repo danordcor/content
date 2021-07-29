@@ -25,4 +25,4 @@ jobs:
         run: ls -la
 
       - name: Copy new files to s3
-        run: aws s3 sync dev/ s3://bucket-dev --delete
+        run: aws s3 sync dev/ s3://bucket-dev-daniel --delete
